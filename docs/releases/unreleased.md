@@ -5,3 +5,7 @@
 - All successfully read license states exit 0. Configuration, request, decoding, and output failures exit nonzero. No token or database header is sent to `/health`, and no authentication verification is performed. Normal connection selection, timeout, TLS verification, and identity opt-out settings apply.
 
 License installation and key/file configuration remain server responsibilities. Existing `ping -o json` license pass-through is unchanged. Closes [arcli#34](https://github.com/Basekick-Labs/arcli/issues/34).
+
+### Fixed
+
+- Preserve connection profile names when reading and writing config files. Mixed-case names remain selectable, dots are treated literally, and profiles whose names differ only in case no longer overwrite each other.

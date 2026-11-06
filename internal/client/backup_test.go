@@ -211,7 +211,7 @@ func TestBackup_StatusIdleAndRestoreBody(t *testing.T) {
 	}
 }
 
-func TestBackup_DisabledServer(t *testing.T) {
+func TestBackup_MissingRoute(t *testing.T) {
 	cli, _ := newAuthTestClient(t, func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/health" {
 			_, _ = w.Write([]byte(`{"status":"ok","time":"t","uptime":"1s"}`))
@@ -221,8 +221,8 @@ func TestBackup_DisabledServer(t *testing.T) {
 		_, _ = w.Write([]byte(`{"error":"Cannot ` + r.Method + ` ` + r.URL.Path + `"}`))
 	})
 	_, _, err := cli.ListBackups(context.Background())
-	var fde *FeatureDisabledError
-	if !errors.As(err, &fde) || fde.ConfigKey != "backup.enabled" {
+	var httpErr *HTTPError
+	if !errors.As(err, &httpErr) || httpErr.Status != http.StatusNotFound {
 		t.Errorf("err = %v", err)
 	}
 }

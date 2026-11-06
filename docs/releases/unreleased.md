@@ -6,3 +6,5 @@
 - Add `arcli tiering` commands for status, bounded file listings, migration, scans, statistics, and per-database policy management. File and policy lists support table, JSON, and CSV output; object commands support table and JSON. Policy input validates database names and non-negative age values, and policy deletion prompts unless `--yes` is passed. Arc currently exposes only a limit for tiered file listings, with no offset or cursor.
 
 License installation and key/file configuration remain server responsibilities. Existing `ping -o json` license pass-through is unchanged. Closes [arcli#34](https://github.com/Basekick-Labs/arcli/issues/34).
+
+- Rename `arcli tiering files` to `arcli tiering file`; preserve original CSV values with lowercase snake_case headers, UTC RFC3339Nano timestamps in table/CSV, and original JSON responses. Preserve inspectable HTTP errors for missing routes rather than inferring disabled features.

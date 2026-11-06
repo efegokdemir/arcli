@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func TestFeatureDisabled_RetentionAndCQ(t *testing.T) {
+func TestFeatureRouteMissing_RetentionAndCQ(t *testing.T) {
 	cli, _ := newAuthTestClient(t, func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/health" {
 			_, _ = w.Write([]byte(`{"status":"ok","time":"t","uptime":"1s"}`))
@@ -20,17 +20,15 @@ func TestFeatureDisabled_RetentionAndCQ(t *testing.T) {
 		_, _ = w.Write([]byte(`{"error":"Cannot ` + r.Method + ` ` + r.URL.Path + `"}`))
 	})
 	ctx := context.Background()
-	var fde *FeatureDisabledError
-	if _, _, err := cli.ListRetentionPolicies(ctx); !errors.As(err, &fde) || fde.ConfigKey != "retention.enabled" {
+	var httpErr *HTTPError
+	if _, _, err := cli.ListRetentionPolicies(ctx); !errors.As(err, &httpErr) || httpErr.Status != http.StatusNotFound {
 		t.Errorf("retention: %v", err)
 	}
-	if _, _, err := cli.ListContinuousQueries(ctx, "", nil); !errors.As(err, &fde) || fde.ConfigKey != "continuous_query.enabled" {
+	if _, _, err := cli.ListContinuousQueries(ctx, "", nil); !errors.As(err, &httpErr) || httpErr.Status != http.StatusNotFound {
 		t.Errorf("cq: %v", err)
 	}
-	if !strings.Contains(fde.Error(), "continuous queries are disabled on this server (continuous_query.enabled=false)") {
-		t.Errorf("Error() = %q", fde.Error())
-	}
 	// Scheduler status is always registered; a 404 there is NOT a feature flag.
+	var fde *FeatureDisabledError
 	if _, err := cli.SchedulerStatus(ctx); errors.As(err, &fde) {
 		t.Errorf("scheduler 404 must not be classified as feature disabled: %v", err)
 	}

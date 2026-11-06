@@ -10,12 +10,8 @@ import (
 	"net/url"
 )
 
-// FeatureDisabledError is returned when an optional server feature's
-// routes are not registered (its `<feature>.enabled` config is false).
-// Arc's router answers such paths with HTTP 404 {"error":"Cannot GET
-// ..."}; the error is only produced after the strict /health check has
-// confirmed the host really is Arc, so a wrong base path or another
-// service is never misreported as a server config problem.
+// FeatureDisabledError describes an explicitly disabled feature. A missing route
+// alone does not establish the server configuration.
 type FeatureDisabledError struct {
 	Feature   string // human name, e.g. "retention policies"
 	ConfigKey string // e.g. "retention.enabled"
@@ -34,9 +30,9 @@ func redactedEndpoint(endpoint string) string {
 	return endpoint
 }
 
-// classifyFeatureRouteMissing maps Fiber's route-missing 404 to a
-// FeatureDisabledError once /health proves the endpoint is Arc; any
-// other error is returned unchanged.
+// classifyFeatureRouteMissing preserves the original HTTP error. A health
+// check can help diagnose a wrong endpoint, but cannot establish why a route
+// is missing (configuration, licensing, server version, or otherwise).
 func (c *Client) classifyFeatureRouteMissing(ctx context.Context, err error, feature, configKey string) error {
 	if !isRouteMissing(err) {
 		return err
@@ -44,12 +40,12 @@ func (c *Client) classifyFeatureRouteMissing(ctx context.Context, err error, fea
 	if _, herr := c.Health(ctx); herr != nil {
 		return fmt.Errorf("%w (and %s does not answer like an Arc server: %v; check the endpoint path)", err, redactedEndpoint(c.cfg.Endpoint), herr)
 	}
-	return &FeatureDisabledError{Feature: feature, ConfigKey: configKey}
+	return err
 }
 
 // featureJSON is the shared request helper for feature-gated JSON
-// routes: optional JSON body, bounded read, non-2xx → *HTTPError (or
-// FeatureDisabledError for a missing route), 2xx → body returned and,
+// routes: optional JSON body, bounded read, non-2xx → inspectable *HTTPError,
+// 2xx → body returned and,
 // when out is non-nil, decoded into it. A 2xx body of "null" is
 // returned as-is so callers can normalise it.
 func (c *Client) featureJSON(ctx context.Context, feature, configKey, method, path string, reqBody any, limit int64, out any) ([]byte, error) {

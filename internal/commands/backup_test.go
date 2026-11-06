@@ -675,7 +675,7 @@ func TestBackup_DisabledServer(t *testing.T) {
 	defer srv.Close()
 	writeTestConfig(t, srv.URL, "tok")
 	_, _, err := execCmd(t, newBackupListCmd())
-	if err == nil || !strings.Contains(err.Error(), "backups are disabled on this server (backup.enabled=false)") {
+	if err == nil || !strings.Contains(err.Error(), "HTTP 404") || strings.Contains(err.Error(), "backup.enabled=false") {
 		t.Errorf("err = %v", err)
 	}
 }

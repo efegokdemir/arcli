@@ -2,6 +2,7 @@ package commands
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -532,7 +533,7 @@ func TestDescribeScheduler_RunningShapes(t *testing.T) {
 	}
 }
 
-func TestFeatureDisabled_Commands(t *testing.T) {
+func TestFeatureRouteMissing_Commands(t *testing.T) {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte(`{"status":"ok","time":"t","uptime":"1s"}`))
@@ -546,7 +547,8 @@ func TestFeatureDisabled_Commands(t *testing.T) {
 	writeTestConfig(t, srv.URL, "tok")
 	for name, c := range map[string]func() *cobra.Command{"retention list": newRetentionListCmd, "cq list": newCQListCmd} {
 		_, _, err := execCmd(t, c())
-		if err == nil || !strings.Contains(err.Error(), "are disabled on this server") {
+		var httpErr *client.HTTPError
+		if !errors.As(err, &httpErr) || httpErr.Status != http.StatusNotFound || strings.Contains(err.Error(), "are disabled on this server") {
 			t.Errorf("%s: err = %v", name, err)
 		}
 	}

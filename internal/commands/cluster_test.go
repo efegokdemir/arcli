@@ -127,7 +127,7 @@ func TestClusterNodes_TableCSVAndFilters(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(out, "2026-09-07T10:00:00Z") || !strings.Contains(out, "never") {
+	if !strings.Contains(out, "2026-09-07T10:00:00.5Z") || !strings.Contains(out, "never") {
 		t.Errorf("heartbeat rendering: %s", out)
 	}
 	out, _, err = execCmd(t, newClusterNodesCmd(), "-o", "csv")

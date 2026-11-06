@@ -406,13 +406,13 @@ func writeRawJSON(w io.Writer, raw json.RawMessage) error {
 	return err
 }
 
-// fmtTimeVal renders a time.Time as UTC RFC3339, or "never" for the zero
+// fmtTimeVal renders a time.Time as UTC RFC3339Nano, or "never" for the zero
 // value (Arc serialises unset times as 0001-01-01T00:00:00Z).
 func fmtTimeVal(t time.Time, none string) string {
 	if t.IsZero() {
 		return none
 	}
-	return t.UTC().Format(time.RFC3339)
+	return t.UTC().Format(time.RFC3339Nano)
 }
 
 // humanBytes renders a byte count with a binary unit suffix.

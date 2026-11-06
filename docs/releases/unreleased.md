@@ -1,6 +1,7 @@
 ### Added
 
-- `arcli audit logs` queries Enterprise audit records with event, actor, database, time, and pagination filters; `arcli audit stats` reports event counts. Both require an administrator token and an Enterprise license with audit logging enabled. Closes [arcli#31](https://github.com/Basekick-Labs/arcli/issues/31).
+- Renamed `arcli audit logs` to `arcli audit log`. Table and CSV timestamps, including the displayed `audit stats` since value, use UTC RFC3339Nano with fractional seconds. JSON preserves the original server response. Unavailable routes retain the HTTP error without inferring `audit_log.enabled=false`.
+- `arcli audit log` queries Enterprise audit records with event, actor, database, time, and pagination filters; `arcli audit stats` reports event counts. Both require an administrator token and an Enterprise license with audit logging enabled. Closes [arcli#31](https://github.com/Basekick-Labs/arcli/issues/31).
 
 - `arcli license status` inspects the public `/health` license block on standalone and clustered Arc deployments, with table and JSON output. Reports tier, server status, source, and optional expiry, days remaining, and site-license state. Expiry uses UTC RFC3339 with fractional seconds when provided.
 - Absent/null license blocks succeed as normal OSS behavior and produce `{"configured":false,"license":null}` in JSON. Present licenses produce `{"configured":true,"license":{...}}`, preserving active, expired, invalid, unlicensed, and unknown server statuses. Optional absent/null fields are omitted; explicit zero days and false site-license values are retained.

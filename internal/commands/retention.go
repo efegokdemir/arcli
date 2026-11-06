@@ -38,7 +38,7 @@ func (f *connFlags) addWithTimeout(c *cobra.Command, def time.Duration) {
 }
 
 // fmtServerTime renders one of Arc's RFC3339 timestamp strings as UTC
-// RFC3339. Empty or zero values (the SQLite driver emits
+// RFC3339Nano. Empty or zero values (the SQLite driver emits
 // 0001-01-01T00:00:00Z when it cannot parse a column) render as none; a
 // string that is not a timestamp at all is shown as-is (scrubbed).
 func fmtServerTime(s, none string) string {
@@ -52,7 +52,7 @@ func fmtServerTime(s, none string) string {
 		}
 		return none
 	}
-	return t.UTC().Format(time.RFC3339)
+	return t.UTC().Format(time.RFC3339Nano)
 }
 
 func fmtServerTimePtr(p *string, none string) string {
